@@ -24,10 +24,10 @@ from skimage import filters
 matplotlib.use('pgf')
 
 
-filename = 'S0.tiff'
+filename = 'S0_0.tiff'
 im = io.imread(filename)
 #im = filters.gaussian(im,sigma=1) # filtering : for smoother boundaries
-
+plt.figure(1)
 plt.imshow(im, cmap='gray')
 
 
@@ -59,8 +59,11 @@ plt.imshow(markers_rw)
 
 from skimage import segmentation
 labels_rw = segmentation.random_walker(im, markers_rw, beta=2500, mode='cg_mg')
+plt.figure(1)
+
 plt.imshow(segmentation.mark_boundaries(color.label2rgb(labels_rw, im), labels_rw))
 
 plt.plot(y, x, 'ok', ms=2)
 plt.savefig('Processed/Random Walker/'+filename)
+
 

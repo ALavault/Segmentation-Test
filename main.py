@@ -49,11 +49,17 @@ def watershed(im,markers,filename):
     labels_hat = segmentation.watershed(canny, markers_ws)
     from skimage import color
     color_labels = color.label2rgb(labels_hat, im)
+
     plt.imshow(segmentation.mark_boundaries(color_labels, labels_hat))
-    plt.plot(x, y, 'or', ms=4)
     plt.axis('off')
-    
+
+    plt.plot(x, y, 'or', ms=4)
     plt.savefig('Processed/Watershed/'+filename)
+    matList = rg.labelExtractor(labels_hat)
+    plt.imshow(matList[0],cmap='gray')
+    plt.savefig('Processed/Watershed/sky_'+filename)
+    plt.imshow(matList[1],cmap='gray')
+    plt.savefig('Processed/Watershed/water_'+filename)
     plt.close('all')
 def randomWalker(im,markers,filename):
     """
@@ -76,9 +82,15 @@ def randomWalker(im,markers,filename):
     from skimage import segmentation
     labels_rw = segmentation.random_walker(im, markers_rw, beta=2500, mode='cg_mg')
     plt.imshow(segmentation.mark_boundaries(color.label2rgb(labels_rw, im), labels_rw))
-    plt.plot(y, x, 'ok', ms=2)
+    plt.plot(x, y, 'ok', ms=2)
     plt.savefig('Processed/Random Walker/'+filename)
+    matList = rg.labelExtractor(labels_rw)
+    plt.imshow(matList[0],cmap='gray')
+    plt.savefig('Processed/Random Walker/sky_'+filename)
+    plt.imshow(matList[1],cmap='gray')
+    plt.savefig('Processed/Random Walker/water_'+filename)
     plt.close('all')
+    
 def clustering(im, filename):
     # Matrix to array conversion
     w, h  = tuple(im.shape)
@@ -89,7 +101,6 @@ def clustering(im, filename):
     Kmeans = cluster.KMeans(n_clusters=6, random_state=0).fit(image_array)
     labels = Kmeans.predict(image_array)
     image_kmeans = np.reshape(labels, (w, h))
-    n_clusters_ = len(np.unique(labels))  
     #print('Estimated number of clusters: %d' % n_clusters_)
     """ 
     %    MeanShift clustering method    %
@@ -98,7 +109,6 @@ def clustering(im, filename):
     ms = cluster.MeanShift(bandwidth=bandwidth, bin_seeding=True) # Much, much slower if bin_seeding=False (from ~1s to ~6min)
     ms.fit(image_array)
     labels = ms.predict(image_array)
-    n_clusters_ = len(np.unique(labels))
     image_ms = np.reshape(labels, (w, h))
     #print('Estimated number of clusters: %d' % n_clusters_)   
     """ 
@@ -108,7 +118,6 @@ def clustering(im, filename):
     core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
     core_samples_mask[db.core_sample_indices_] = True
     labels = db.labels_
-    n_clusters_ = len(np.unique(labels))
     image_db = np.reshape(labels, (w, h))
     #print('Estimated number of clusters: %d' % n_clusters_)        
     """
@@ -146,6 +155,7 @@ def slic(im, filename):
     plt.imshow(segmentation.mark_boundaries(color.label2rgb(labels, im), labels))
     plt.axis('off')    
     plt.savefig('Processed/Slic/'+filename)
+    
 
 def quickshift(im, filename):
     plt.close('all') # Close all remaining figures
@@ -161,6 +171,7 @@ def quickshift(im, filename):
     plt.imshow(segmentation.mark_boundaries(color.label2rgb(labels, im), labels))
     plt.savefig('Processed/Quickshift/'+filename)
 
+
     
     plt.imshow(segmentation.mark_boundaries(color.label2rgb(labels, im), labels))
 def regionGrowing(image, seeds, pixelThreshold, regionThreshold, filename):
@@ -171,6 +182,11 @@ def regionGrowing(image, seeds, pixelThreshold, regionThreshold, filename):
     plt.imshow(segmentation.mark_boundaries(color.label2rgb(labels, image), labels))
     plt.plot(x, y, 'or', ms=3)
     plt.savefig('Processed/Region Growing/'+filename)
+    matList = rg.labelExtractor(labels)
+    plt.imshow(matList[0],cmap='gray')
+    plt.savefig('Processed/Region Growing/sky_'+filename)
+    plt.imshow(matList[1],cmap='gray')
+    plt.savefig('Processed/Region Growing/water_'+filename)
 
 
 
@@ -193,12 +209,12 @@ def main():
             if isFirstIteration:
 
                 im = io.imread(filename) # Open the image
-                print(type(im[0,0]))
-
                 plt.figure(1)
                 plt.imshow(im, cmap='gray')
                 print('Choose '+str(n)+ ' points for segmentation in this order : Sky, water, others')
                 markers = plt.ginput(n) # n points to choose as markers/seeds
+                print('Init done')
+
                 markers=np.asarray(markers) # Convert a Python list to a Numpy array
                 seeds=markers
                 isFirstIteration = False
@@ -218,10 +234,9 @@ def main():
                 else:
                     regionGrowing(im, seeds, pTh, rTh, filename)
 
-                print('Done')
             else:
                 im = io.imread(filename) # Open the image
-                #markers=np.asarray(markers) # Convert a Python list to a Numpy array
+                markers=np.asarray(markers) # Convert a Python list to a Numpy array
                 watershed(im,markers,filename)
                 randomWalker(im,markers,filename)
                 clustering(im, filename)
@@ -232,7 +247,7 @@ def main():
                     regionGrowing(im, seeds, pTh/256, rTh/256, filename)
                 else:
                     regionGrowing(im, seeds, pTh, rTh, filename)
-
+                    
         except IOError:
             print(filename+' : Not a file or not an image (IOError)')
     plt.close('all')
