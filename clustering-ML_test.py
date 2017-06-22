@@ -32,7 +32,7 @@ import time
 
 plt.close('all') # Close all remaining figures
 
-filename = 'DoP.tiff'
+filename = 'DoP_0.tiff'
 im = io.imread(filename) # Open the image
 
 

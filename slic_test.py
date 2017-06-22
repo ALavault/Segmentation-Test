@@ -22,7 +22,7 @@ from skimage import color
 plt.close('all') # Close all remaining figures
 
 
-filename = 'I135.tiff'
+filename = 'I135_0.tiff'
 im = io.imread(filename) # Open the image
 im = img_as_float(im)
 im=color.grey2rgb(im) 
