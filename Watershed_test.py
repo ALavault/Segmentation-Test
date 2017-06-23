@@ -26,7 +26,7 @@ from skimage import feature
 plt.close('all') # Close all remaining figures
 
 
-filename = 'I90.tiff'
+filename = 'DoP_0.tiff'
 im = io.imread(filename) # Open the image
 plt.figure(1)
 plt.imshow(im, cmap='gray')
@@ -57,7 +57,7 @@ mu=1.8 # Coefficient
 hat =hat.astype('float64')- mu * im.astype('float64')
 """
 
-hat = feature.canny(im, sigma = 3)
+hat = feature.canny(im, sigma = 1)
 hat=morphology.dilation(hat, morphology.disk(1))
 plt.figure(2)
 plt.imshow(hat, cmap='gray')

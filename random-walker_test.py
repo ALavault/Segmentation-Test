@@ -24,9 +24,9 @@ from skimage import filters
 matplotlib.use('pgf')
 
 
-filename = 'S0_0.tiff'
+filename = 'I0_0.tiff'
 im = io.imread(filename)
-#im = filters.gaussian(im,sigma=1) # filtering : for smoother boundaries
+#im = filters.gaussian(im) # filtering : for smoother boundaries
 plt.figure(1)
 plt.imshow(im, cmap='gray')
 
@@ -58,7 +58,7 @@ for k in markers:
 plt.imshow(markers_rw)
 
 from skimage import segmentation
-labels_rw = segmentation.random_walker(im, markers_rw, beta=2500, mode='cg_mg')
+labels_rw = segmentation.random_walker(im, markers_rw, beta=2500, mode='bf')
 plt.figure(1)
 
 plt.imshow(segmentation.mark_boundaries(color.label2rgb(labels_rw, im), labels_rw))
