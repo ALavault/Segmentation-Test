@@ -35,7 +35,7 @@ import PIL.Image as Image
 Auxiliaryfunctions
 """
 
-def watershed(im,markers,filename='image.png',sigma = 3):
+def watershed(im,markers,filename='image.png',sigma = 3, heightmap=None):
     plt.close('all') # Close all remaining figures
     plt.figure(1)
     x, y = markers.T # Extract the markers coordinates
@@ -49,10 +49,17 @@ def watershed(im,markers,filename='image.png',sigma = 3):
         i+=1
 
     markers_ws = morphology.dilation(markers_ws, morphology.disk(3))
-    canny = feature.canny(im, sigma = sigma)
-    canny=morphology.dilation(canny, morphology.disk(1))
-    plt.imshow(canny, cmap='gray')
-    labels_hat = segmentation.watershed(canny, markers_ws)
+    if heightmap is None:
+        canny = feature.canny(im, sigma = sigma)
+        canny=morphology.dilation(canny, morphology.disk(1))
+        plt.imshow(canny, cmap='gray')
+        labels_hat = segmentation.watershed(canny, markers_ws)
+
+    else:
+        canny = heightmap
+        #canny=morphology.dilation(canny, morphology.disk(1))
+        plt.imshow(canny, cmap='gray')
+        labels_hat = segmentation.watershed(canny, markers_ws)
     from skimage import color
     color_labels = color.label2rgb(labels_hat, im)
 
@@ -159,7 +166,7 @@ def felzenszwalb(im, filename):
 def slic(im, filename):
     plt.close('all') # Close all remaining figures
     im = img_as_float(im)
-    labels=segmentation.slic(im, n_segments=3, compactness=0.001, sigma=1) # sigma > 0 => smoothed image    
+    labels=segmentation.slic(im, n_segments=25, compactness=0.001, sigma=1) # sigma > 0 => smoothed image    
     labels=img_as_ubyte(segmentation.mark_boundaries(color.label2rgb(labels, im), labels))
     imout = Image.fromarray(labels, mode = 'RGB')
     imout.save('Processed/Slic/'+filename)
@@ -171,10 +178,15 @@ def quickshift(im, filename):
     plt.figure(1)
     mu=2
     im-= mu*canny
+    w, h = im.shape
+    for i in range(w):
+        for j in range(h):
+            if im[i,j]<0:
+                im[i,j]=0
     im=color.gray2rgb(im)
-    labels=segmentation.quickshift(im, kernel_size=5, max_dist=600, ratio=0.9,sigma=0)
-    #print('Quickshift number of segments: {}'.format(len(np.unique(labels))))
-    labels = segmentation.mark_boundaries(color.label2rgb(labels, im), labels)
+    labels = segmentation.quickshift(im, kernel_size=5, max_dist=600, ratio=0.9,sigma=0)
+    labels=img_as_ubyte(color.label2rgb(labels, im))
+    imout = Image.fromarray(labels, mode = 'RGB')
     io.imsave('Processed/Quickshift/'+filename, labels)
 
     
@@ -213,7 +225,7 @@ def main():
     n= 3
     matList=[]
     pTh= 5000
-    rTh = 3250
+    rTh = 2550
     isFirstIteration=True
     fileList = os.listdir(os.getcwd())
     for filename in fileList:
@@ -222,10 +234,10 @@ def main():
             print('processing '+filename)
             if filename == 'S1_0.tiff':
                 pTh=1600
-                rTh=2500
+                rTh=2000
             else:
                 pTh= 5000
-                rTh = 3250
+                rTh = 2000
             if isFirstIteration:
 
                  # Open the image
@@ -281,50 +293,7 @@ def main():
             print(filename+' : Not a file or not an image (IOError). This file will be skipped.')
     plt.close('all')
     print('Done !')
-    
-    labelList=[]
-    for mat in matList:
-        labelList.append(rg.labelExtractor(mat))
-    
-    mat = labelList[0][0]
-    
-    sky = np.zeros(mat.shape)
-    water = np.zeros(mat.shape)
-    for k in range(len(labelList)):
-        for l in range(len(labelList[0])):
-            if l%n==0:
-                sky+=color.rgb2gray(labelList[k][l])
-            elif l%n==1:
-                water+=color.rgb2gray(labelList[k][l])
-            else:
-                ()
-    print(np.max(water))
-    plt.figure(1)
-    plt.imshow(water)
-    for i in range(len(water)):
-        for j in range(len(water[0])):
-            if water[i,j]<np.max(water)//2:
-                water[i,j]=0
-            else:
-                water[i,j]=1
-    #water = morphology.dilation(water, morphology.disk(1))
-    plt.figure(2)
-    plt.imshow(sky)
-    plt.figure(3)
-    plt.imshow(color.label2rgb(water, im))
 
-
-    
-
-
-    
-
-
-
-
-
-
-        
         
 if __name__ == "__main__":
     main()

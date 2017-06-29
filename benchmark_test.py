@@ -22,6 +22,7 @@ from skimage import feature
 from skimage import filters
 
 from  sklearn import cluster
+from sklearn import metrics
 from skimage.util import img_as_float
 import regiongrowing as rg
 
@@ -50,9 +51,9 @@ def getConfusionMatrix(groundTruth, prediction):
 
 
 plt.close('all')
-groundTruthfname = 'Base/I0_0_c.tiff'
+groundTruthfname = 'Base/S1_0_c.tiff'
 gt = io.imread(groundTruthfname)
-imagefname = 'I0_0.tiff'
+imagefname = 'S1_0.tiff'
 im = io.imread(imagefname)
 n=3
 plt.figure(1)
@@ -65,16 +66,42 @@ seeds=markers
 isFirstIteration = False
 for i in range(len(seeds)):
     x_,y_ = seeds[i]
-    seeds[i]=[y_,x_]
+#    seeds[i]=[y_,x_]
 markers.astype(int)
 seeds.astype(int)
+i = im.max()-im.min()
+pTh= 5000
+rTh = 3150
+matList =[]
 
-labels = main.randomWalker(im, markers,'image.png')
+
+
+#grad = filters.rank.gradient(im, morphology.disk(5))
+#labels =  main.regionGrowing(im, seeds, pTh, rTh, 'image.png', matList)
+#labels =  main.randomWalker(im, seeds, 'image.png')
+labels =  main.watershed(im, seeds, 'image.png')          
+            
+
+
+
+w, h = original_shape = tuple(im.shape)
+gt_array = np.reshape(gt, (w * h,1))
+for i in range(w):
+    for j in range(h):
+        if labels[i,j]>=3:
+            labels[i,j]=0
+labels_array = np.reshape(labels, (w * h,1))
+
+cm = metrics.confusion_matrix(gt_array, labels_array)
+acc = metrics.classification_report(gt_array, labels_array, target_names=['Background', 'Sky', 'Water'])
+i = im.max()-im.min()
+print(i)
+print(imagefname)
+print(acc)
 
 plt.figure(1)
-plt.imshow(labels)
+plt.imshow(color.label2rgb(labels, im))
 plt.figure(2)
-plt.imshow(gt)
-print(labels.size)
-getConfusionMatrix(gt, labels)
-                
+plt.imshow(color.label2rgb(gt, im))
+plt.figure(3)
+plt.imshow(hm)

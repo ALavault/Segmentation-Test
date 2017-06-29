@@ -48,15 +48,18 @@ for k in markers:
 markers_ws = morphology.dilation(markers_ws, morphology.disk(3))
 
 
-# Watershed, as seen at http://emmanuelle.github.io/a-tutorial-on-segmentation.html
+# Watershed segmentaion algorithm
 """
-# Black tophat transformation 
-hat = ndimage.white_tophat(im, 7)
-# Combine with the original image (a type conversion is compulsory) to create the heightmap for the algorithm
-mu=1.8 # Coefficient 
-hat =hat.astype('float64')- mu * im.astype('float64')
+hm=morphology.dilation(morphology.closing(feature.canny(filters.prewitt(im)), morphology.square(5)))
+labelsW = main.watershed(im, markers,'image.png', heightmap = hm)
+labelsS = main.watershed(im, markers,'image.png')
+labels = np.zeros(im.shape)
+for i in range(w):
+    for j in range(h):
+        if labelsW[i,j] == labelsS[i,j]:
+            labels[i,j] = labelsS[i,j]
 """
-
+# Heightmap generation
 hat = feature.canny(im, sigma = 1)
 hat=morphology.dilation(hat, morphology.disk(1))
 plt.figure(2)
