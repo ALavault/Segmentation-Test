@@ -17,8 +17,10 @@ The following methods have been implemented and tested :
 ## Details and remarks
 Watershed method :
 - Uses segmentation from skimage. Uses a gradient of the image as heightmap for flooding.
+
 Random Walker :
 - Uses segmentation from skimage.
+
 Felzenswalb :
 - Uses segmentation from skimage.
 Quickshift :
