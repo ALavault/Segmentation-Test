@@ -1,21 +1,24 @@
-VIPeR Project - Segmentation tests
+Segmentation tests
 
 The following methods have been tested :
 	- Watershed (with 2 and 3 seeds)
 	- Random Walker (with 2 and 3 seeds)
 	- Felzenswalb (no seeds required)
+	- Quickshift (no seeds required)
 	- Slic (no seeds required, number of segments required)
 	- Clustering methods (no seeds required)
 		o K-means (number of clusters required)
 		o MeanShift
 		o DBSCAN
-	- Region Growing (with three seeds)
+	- Region Growing (with three seeds and naive algorithm)
 
 Watershed method :
 	Uses segmentation from skimage. Uses a gradient of the image as heightmap for flooding.
 Random Walker :
 	Uses segmentation from skimage.
 Felzenswalb :
+	Uses segmentation from skimage.
+Quickshift :
 	Uses segmentation from skimage. 
 Slic :
 	Uses segmentation from skimage. Number of segments can be changed.
