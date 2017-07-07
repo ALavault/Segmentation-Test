@@ -11,6 +11,7 @@ The following methods have been tested :
 		o MeanShift
 		o DBSCAN
 	- Region Growing (with three seeds and naive algorithm)
+	- Expectation–maximization algorithm
 
 Watershed method :
 	Uses segmentation from skimage. Uses a gradient of the image as heightmap for flooding.
@@ -29,4 +30,5 @@ Region Growing :
 	Not optimized. 
 	Has an option to force the seeding of unseeded pixels (because of thresholds too tight for instance)
 	Has an option to sort to be visited pixels but does not give any results.
-	
+Expectation–maximization :
+	Uses scikit-learn to implement an expectation-maximization algorithm based on gaussian mixture
