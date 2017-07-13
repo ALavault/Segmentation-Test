@@ -20,7 +20,7 @@ from skimage import exposure
 from skimage import filters
 from sklearn import mixture
 from skimage import util
-
+import time
 
 
 def segmentEM(image, n_components=8, max_iter=100):    
@@ -88,25 +88,23 @@ def sortLabels(labels):
             labels[i] = idx
     return labels
 
-"""
 #To test the function .....
 
 plt.close('all')
 
 
-im = io.imread('S1_0.tiff')
+im = io.imread('S0_0.tiff')
 im = util.img_as_ubyte(im)
-
+im = exposure.rescale_intensity(im)
 
 hist, bins = exposure.histogram(im) # Histogram of the 8bit image
 hist = 1/float(im.size)*hist # Normalization -> pdf  
 
 plt.plot(bins, hist, 'b-')
-
-label, labels= segmentEM(im, n_components = 15, max_iter=100)
-
+dt = time.time()
+label, labels= segmentEM(im, n_components = 7, max_iter=100)
+print(time.time()-dt)
 plt.figure(2)
 plt.imshow(label, cmap = 'gray')
 plt.figure(3)
 plt.imshow(color.label2rgb(label, im))
-"""
